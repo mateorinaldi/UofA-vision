@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "computer"
+name = "UofA-vision"
 version = "0.1.0"
 description = ""
 authors = ["Mateo <mateo.rinaldi54@gmail.com>"]
 readme = "README.md"
-packages = [{include = "computer"}]
+packages = [{include = "UofA-vision"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
