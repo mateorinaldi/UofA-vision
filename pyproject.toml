@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "computer"
+version = "0.1.0"
+description = ""
+authors = ["Mateo <mateo.rinaldi54@gmail.com>"]
+readme = "README.md"
+packages = [{include = "computer"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^1.25.0"
+lap = "^0.4.0"
+ultralytics = "^8.0.124"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
