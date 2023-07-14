@@ -58,5 +58,11 @@ After this, it is possible that some dependencies are not able to install proper
 pip3.10 install -r requirements.txt
 ```
 
+To be completely sure that 'lap' library is installed, run this command :
+
+```bash
+pip3.10 install lap
+```
+
 You can now run and modify main.py program as you want !
 

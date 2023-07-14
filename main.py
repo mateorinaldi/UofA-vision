@@ -7,6 +7,7 @@ from time import sleep
 import tracking_detectors
 
 video_path = 'videos/Georges.h264'
+image_path = 'image.jpg'
 
 if video_path.split('.')[-1] == 'h264':  # If type is h264, we have to convert it to mp4
 	new_video_path = video_path[:-4]+'mp4'
@@ -14,15 +15,13 @@ if video_path.split('.')[-1] == 'h264':  # If type is h264, we have to convert i
 	video_path = new_video_path
 	print(video_path)
 
-image_path = 'image.jpg'
-
 '''camera parameter'''
 
 try:
 	import picamera
 
 	camera = picamera.PiCamera()
-	camera.resolution = (1296, 972)
+	camera.resolution = (324, 243)
 	camera.shutter_speed = 15000
 	camera.awb_mode = 'auto'
 	camera.iso = 800
@@ -112,8 +111,7 @@ def positions_in_pixels_to_centimeters(homography_matrix, positions_list_pixels)
 	return positions_list_centimeters
 
 
-def solos_points_remover(
-		positions_list):  # To remove every point which is solo/strange, probably due to an error of vision recognition
+def solos_points_remover(positions_list):  # To remove every point which is solo/strange, probably due to an error of vision recognition
 	corrected_positions_list = positions_list.copy()
 	list_lenght = len(corrected_positions_list)
 
@@ -130,12 +128,10 @@ def solos_points_remover(
 			if neighbor_value:
 				count_True_in_neighborhood += 1
 
-		if count_True_in_neighborhood <= 3 and booleean_tab[
-			ind_position_to_check]:  # Most neighbors are False but the position is True
+		if count_True_in_neighborhood <= 3 and booleean_tab[ind_position_to_check]:  # Most neighbors are False but the position is True
 			booleean_tab[ind_position_to_check] = False
 			corrected_positions_list[ind_position_to_check] = [None, None]
-		elif count_True_in_neighborhood >= 4 and not booleean_tab[
-			ind_position_to_check]:  # Most neighbors are True but the position is False
+		elif count_True_in_neighborhood >= 4 and not booleean_tab[ind_position_to_check]:  # Most neighbors are True but the position is False
 			booleean_tab[ind_position_to_check] = True
 			average = np.array([0.0, 0.0])
 			for neighbor_value in corrected_positions_list[ind_position_to_check - 3:ind_position_to_check + 4]:  # We tak a look at the 6 neighbors
@@ -240,21 +236,6 @@ def positions_to_distance(positions):
 	return int(distance)
 
 
-# def old_calibrate_camera():
-#     image_path = input("Give the image path : ")
-#     number_of_points = int(input("Give the number of points you want to give (4 minumum) : "))
-#     real_world_pts = np.empty((0, 2))
-#     for i in range(number_of_points):
-#         x = int(input(f"Give the x coordinate of point {i+1} : "))
-#         y = int(input(f"Give the y coordinate of point {i+1} : "))
-#         real_world_pts = np.vstack([real_world_pts, [x,y]])
-
-#     reference_points_coordinates_pixel = define_reference_points(image_path, number_of_points)
-#     homography_matrix = find_homography_matrix(real_world_pts, reference_points_coordinates_pixel)
-
-#     return homography_matrix
-
-
 def get_real_life_coordinates():
 	coordinates_calibration = open("coordinates_calibration.txt", "r")  # "r" to read
 	raw_real_life_coordinates = coordinates_calibration.readlines()
@@ -288,16 +269,15 @@ def calibrate_camera():
 	real_life_coordinates = get_real_life_coordinates()
 	number_of_points = len(real_life_coordinates)
 	for position_number in range(1, number_of_points + 1):
-		input(
-			f"Go to position {position_number} {real_life_coordinates[position_number - 1]}\nThen press enter and turn on yourself\n")
+		input(f"Go to position {position_number} {real_life_coordinates[position_number - 1]}\nThen press enter and turn on yourself\n")
 		print('wait')
 		camera.start_recording(f"videos_calibration/point{position_number}.h264")
-		sleep(5)  # Record for 5pseconds
+		sleep(5)  # Record for 5 seconds
 		camera.stop_recording()
 
 	reference_positions = []
 	for num_point in range(1, number_of_points + 1):
-		reference_positions.append(tracking_detectors.color_finder(f"videos_calibration/point{num_point}.h264"))
+		reference_positions.append(tracking_detectors.yolo_body_tracker(f"videos_calibration/point{num_point}.h264"))
 
 	average_positions_in_pixels = np.empty((0, 2))
 	for position in reference_positions:
@@ -345,11 +325,11 @@ def main_test():
 
 	positions_graph_filler(video_path, positions)  # Print the position graph
 
-	print_positions(positions, xlim=(0, 1920), ylim=(0, 1080), xlabel="pixels", ylabel="pixels")
+	print_positions(positions, xlabel="pixels", ylabel="pixels")
 
 	positions_without_solos_points = solos_points_remover(positions)  # Remove strange points
 
-	print_positions(positions_without_solos_points, xlim=(0, 1920), ylim=(0, 1080), xlabel="pixels", ylabel="pixels")
+	print_positions(positions_without_solos_points, xlabel="pixels", ylabel="pixels")
 
 	positions_in_centimeter = positions_in_pixels_to_centimeters(homography_matrix, positions_without_solos_points)  # Get real life positions
 
@@ -358,7 +338,7 @@ def main_test():
 	cleaned_paths = [positions_cleaner(path) for path in list_of_paths]  # Smoothing of each path
 
 	for path in cleaned_paths:
-		print_positions(path, xlim=(-200, 600), ylim=(-100, 400), xlabel="centimeters", ylabel="centimeters")
+		print_positions(path, xlabel="centimeters", ylabel="centimeters")
 		print(positions_to_distance(path))
 
 
